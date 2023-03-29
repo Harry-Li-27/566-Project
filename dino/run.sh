@@ -30,4 +30,4 @@ python3 -m torch.distributed.launch \
         --output_dir ./output/
 
 # run local
-python3 -m torch.distributed.launch --nproc_per_node=1 dino-main/main_dino.py --arch resnet50 --optimizer sgd --batch_size_per_gpu 32 --epochs 60 --lr 0.03 --weight_decay 1e-4 --weight_decay_end 1e-4 --global_crops_scale 0.14 1 --local_crops_scale 0.05 0.14 --data_path ../imagenet-mini/train --output_dir ./output/ --dist_url "file:///sharefile"
+python3 -m torch.distributed.launch --nproc_per_node=1 dino-main/main_dino.py --arch resnet50 --optimizer sgd --batch_size_per_gpu 16 --epochs 60 --lr 0.03 --weight_decay 1e-4 --weight_decay_end 1e-4 --global_crops_scale 0.14 1 --local_crops_scale 0.05 0.14 --data_path ../imagenet-mini/train --output_dir ./output/ --dist_url "file:///sharefile" --num_workers 2
