@@ -18,7 +18,7 @@ imagenet_origin_transform = transforms.Compose([
                                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                                 ])
 
-CUB_dataset = datasets.ImageFolder('CUB_200_2011/CUB_200_2011/images', 
+CUB_dataset = datasets.ImageFolder('CUB_200_2011/images', 
                                     imagenet_origin_transform)
 
 def train(device, train_loader, model, optimizer, scheduler=None):
@@ -26,7 +26,7 @@ def train(device, train_loader, model, optimizer, scheduler=None):
     total = 0
 
     for batch_idx, batch in enumerate(train_loader):
-        im, target, _ = batch
+        im, target = batch
         total+= im.shape[0]
 
         im, target = im.to(device), target.to(device)
@@ -40,20 +40,17 @@ def train(device, train_loader, model, optimizer, scheduler=None):
         ce_loss = F.cross_entropy(output, target)
         loss = ce_loss
 
-        total_loss += loss
         loss.backward()
         optimizer.step()
     if scheduler != None:
         scheduler.step()
-
-    total_loss = float(total_loss)
     accuracy = float(correct.item()/total)
-    return total_loss, accuracy
+    return accuracy
 
 def eval(model, val_loaders, device):
     class_correct = 0
     for batch_idx, batch in enumerate(val_loaders):
-        im, target, _ = batch
+        im, target  = batch
         im, target = im.to(device), target.to(device)
         output = model(im)
         pred = output.data.max(1, keepdim=True)[1]
@@ -73,11 +70,11 @@ def transferbility(model, dataset, device):
     model.fc = torch.nn.Linear(2048, 200)
     model.eval()
     model = model.to(device)
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
 
     for epoch in range(60):
-        _, acc = train(device, train_loader, model, scheduler)
+        acc = train(device, train_loader, model, optimizer, scheduler)
         eval_acc = eval(model, test_loader, device)
         print(f"train_acc: {acc}, val_acc: {eval_acc}")
         with open("result.txt", "a") as f:
