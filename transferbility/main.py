@@ -70,7 +70,7 @@ def transferbility(model, dataset, device):
     model.fc = torch.nn.Linear(2048, 200)
     model.eval()
     model = model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-5)
+    optimizer = torch.optim.Adam(model.fc.parameters(), weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
 
     for epoch in range(60):
