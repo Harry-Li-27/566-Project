@@ -24,3 +24,6 @@ python3 -m torch.distributed.launch \
         --rank 0 \
         -j 4 \
         ../imagenet-mini
+
+#run local
+python -m torch.distributed.launch --nproc_per_node=1 moco-v3-main/main_moco.py --moco-m-cos --crop-min=.2 --batch-size 16 --epochs 60 --multiprocessing-distributed --world-size 1 --rank 0 -j 2 ../imagenet-mini --dist-url "file:///sharefile"
