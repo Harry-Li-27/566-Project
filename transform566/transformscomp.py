@@ -105,18 +105,20 @@ def skew():
     return T.Compose([
             T.RandomPerspective(0.6, 1),
             T.CenterCrop(150),
-            T.Resize(224, interpolation=Image.BICUBIC),
+            T.Resize((224,224), interpolation=Image.BICUBIC),
             Normalize()
     ])
 
 def grid(): 
     return T.Compose([
+        T.Resize((224,224), interpolation=Image.BICUBIC),
         T.GridMask(),
         Normalize()
     ])
 
 def randmosaic():
     return T.Compose([
+        T.Resize((224,224), interpolation=Image.BICUBIC), 
         T.RandomMosaic((3,3)),
         Normalize()
     ])
@@ -135,6 +137,7 @@ def randcrop():
 
 def colorjit():
     return T.Compose([
+        T.Resize((224,224), interpolation=Image.BICUBIC),
         T.RandomApply(
             [T.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1)],
             p=0.8
@@ -161,11 +164,11 @@ class trans_566(object):
     def __init__(self, t1="", t2="", moco=False):
         self.t1 = transdict[t1]
         self.t2 =  transdict[t1] if t2 == "" else transdict[t2]
-        if moco:
+        if ~moco:
             self.t3 = localize(self.t1)
         else:
             self.t3 = None
-        print(f"Debug: transform1 is {t1}, transform2 is {t2}. Training on moco: {moco}.\n")
+        print(f"Debug: transform1 is {t1}, transform2 is {t2}. Training on dino: {moco}.\n")
 
 # t = trans_566("randcrop","randcrop")
 # t.t1, t.t2, t.t3
