@@ -2,6 +2,8 @@ import torch
 from torch import Tensor
 
 import torchvision.transforms as T
+import torchvision.transforms.functional as TF
+import random
 from PIL import Image, ImageOps, ImageFilter
 
 from numpy import random
@@ -24,6 +26,14 @@ def Flip_colorjitter():
             T.RandomGrayscale(p=0.2),
         ])
 
+class NewRotateTransform:
+    def __init__(self, angles):
+        self.angles = angles
+
+    def __call__(self, x):
+        angle = int(random.choice(self.angles))
+        return TF.rotate(x, angle)
+        
 class GaussianBlur(object):
     """
     Apply Gaussian Blur to the PIL image.
@@ -91,6 +101,15 @@ def moco_1():
         GaussianBlur(1.0),
         Normalize()
     ])
+    
+def moco_1_rotate():
+    return T.Compose([
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        NewRotateTransform([0, 90, 180, 270]),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
 
 def moco_2():
     return T.Compose([
@@ -100,32 +119,182 @@ def moco_2():
         Solarization(0.2),
         Normalize()
     ])
-
+    
+def moco_2_rotate():
+    return T.Compose([
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        NewRotateTransform([0, 90, 180, 270]),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])
+    
+def moco_1_s():
+    return T.Compose([
+        skew(),
+        # T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
+    
+def moco_2_s():
+    return T.Compose([
+        skew(),
+        # T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])
+    
+def moco_1_g():
+    return T.Compose([
+        grid(),
+        # T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
+    
+def moco_2_g():
+    return T.Compose([
+        # T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        grid(),
+        Flip_colorjitter(),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])
+    
+def moco_1_r():
+    return T.Compose([
+        randmosaic(),
+        # T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
+    
+def moco_2_r():
+    return T.Compose([
+        randmosaic(),
+        # T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])
+    
+def moco_1_rs():
+    return T.Compose([
+        randmosaic(),
+        skew(),
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
+    
+def moco_2_rs():
+    return T.Compose([
+        randmosaic(),
+        skew(),
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])
+    
+def moco_1_rg():
+    return T.Compose([
+        randmosaic(),
+        grid(),
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
+    
+def moco_2_rg():
+    return T.Compose([
+        randmosaic(),
+        grid(),
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])
+def moco_1_sg():
+    return T.Compose([
+        skew(),
+        grid(),
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
+def moco_2_sg():
+    return T.Compose([
+        skew(),
+        grid(),
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        Flip_colorjitter(),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])
+    
+def moco_1_augmix():
+    return T.Compose([
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        T.AugMix(),
+        Flip_colorjitter(),
+        GaussianBlur(1.0),
+        Normalize()
+    ])
+    
+def moco_2_augmix():
+    return T.Compose([
+        T.RandomResizedCrop(224, scale=(0.08, 1.)),
+        T.AugMix(),
+        Flip_colorjitter(),
+        GaussianBlur(0.1),
+        Solarization(0.2),
+        Normalize()
+    ])    
+    
 def skew():
     return T.Compose([
-            T.RandomPerspective(0.6, 1),
-            T.CenterCrop(150),
-            T.Resize((224,224), interpolation=Image.BICUBIC),
-            Normalize()
+        T.RandomApply(
+            [T.RandomPerspective(0.6, 1), T.CenterCrop(150)],
+            p=0.8
+        ),
+        T.Resize((224, 224), interpolation=Image.BICUBIC)
     ])
 
 def grid(): 
     return T.Compose([
-        T.Resize((224,224), interpolation=Image.BICUBIC),
-        T.GridMask(),
-        Normalize()
+        T.Resize((224, 224), interpolation=Image.BICUBIC),
+        T.GridMask((30,30), (40,40))
     ])
 
 def randmosaic():
     return T.Compose([
-        T.Resize((224,224), interpolation=Image.BICUBIC), 
-        T.RandomMosaic((3,3)),
-        Normalize()
+        T.Resize((224, 224), interpolation=Image.BICUBIC),
+        T.RandomApply(
+            # [T.RandomMosaic((3 + random.randint(3), 3 + random.randint(3)))],
+            [T.RandomMosaic((3, 3))],
+            p=0.8
+        ),
     ])
 
 def localize(Transform):
     return T.Compose([
-        Transform, 
+        Transform,
         T.RandomResizedCrop(96, scale=(0.05, 0.4), interpolation=Image.BICUBIC)
     ])
 
@@ -137,7 +306,7 @@ def randcrop():
 
 def colorjit():
     return T.Compose([
-        T.Resize((224,224), interpolation=Image.BICUBIC),
+        T.Resize((224, 224), interpolation=Image.BICUBIC),
         T.RandomApply(
             [T.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.2, hue=0.1)],
             p=0.8
@@ -157,7 +326,23 @@ transdict = {
     "dino_g2":dino_g2(),
     "dino_l":dino_l(),
     "moco_1":moco_1(),
-    "moco_2":moco_2()
+    "moco_2":moco_2(),
+    "moco_1_s":moco_1_s(),
+    "moco_2_s":moco_2_s(),
+    "moco_1_g":moco_1_g(),
+    "moco_2_g":moco_2_g(),
+    "moco_1_r":moco_1_r(),
+    "moco_2_r":moco_2_r(),
+    "moco_1_sg":moco_1_sg(),
+    "moco_2_sg":moco_2_sg(),
+    "moco_1_rg":moco_1_rg(),
+    "moco_2_rg":moco_2_rg(),
+    "moco_1_rs":moco_1_rs(),
+    "moco_2_rs":moco_2_rs(),
+    "moco_1_augmix":moco_1_augmix(),
+    "moco_2_augmix":moco_2_augmix(),
+    "moco_1_rotate":moco_1_rotate(),
+    "moco_2_rotate":moco_2_rotate(),
 }
 
 class trans_566(object):
