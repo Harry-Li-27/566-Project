@@ -131,4 +131,4 @@ dmypy.json
 # imagenet
 /imagenet-mini/
 
-.DS_Store
+*/.DS_Store
